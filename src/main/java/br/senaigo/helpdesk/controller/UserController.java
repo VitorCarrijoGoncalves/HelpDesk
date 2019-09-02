@@ -34,7 +34,7 @@ public class UserController {
 	@Autowired
 	private PasswordEncoder passwordEncoder;
 	
-	@PostMapping
+	@PostMapping(produces = "application/json")
 	@PreAuthorize("hasAnyRole('ADMIN')") // autorização de acordo com o perfil
 	public ResponseEntity<Response<User>> create(HttpServletRequest request, @RequestBody User user,
 			BindingResult result) {
@@ -72,7 +72,7 @@ public class UserController {
 		}
 	}
 	
-	@PutMapping
+	@PutMapping(produces = "application/json")
 	@PreAuthorize("hasAnyRole('ADMIN')")
 	public ResponseEntity<Response<User>> update(HttpServletRequest request, @RequestBody User user,
 			BindingResult result) {
