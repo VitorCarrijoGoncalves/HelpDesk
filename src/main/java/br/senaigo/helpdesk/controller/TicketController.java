@@ -249,5 +249,62 @@ public class TicketController {
 		
 	}
 		
+	@PutMapping(value="{id}/{status}")
+	@PreAuthorize("hasAnyRole('CUSTOMER', 'TECHNICIAN')")
+	public ResponseEntity<Response<Ticket>> changeStatus(
+			@PathVariable("id") String id,
+			@PathVariable("status") String status, 
+			HttpServletRequest request, 
+			@RequestBody Ticket ticket, 
+			BindingResult result) {
+		
+		Response<Ticket> response = new Response<>();
+		
+		try {
+			
+			validateChangeStatus(id, status, result);
+			if (result.hasErrors()) {
+				result.getAllErrors().forEach(error -> response.getErrors().add(error.getDefaultMessage()));
+				return ResponseEntity.badRequest().body(response);
+			}
+			
+			Ticket ticketCurrent = ticketService.findById(id);
+			ticketCurrent.setStatus(StatusEnum.getStatus(status));
+			if (status.equals("Assigned")) {
+				ticketCurrent.setAssignedUser(userFromRequest(request));
+			}
+			
+			Ticket ticketPersisted = (Ticket) ticketService.createOrUpdate(ticketCurrent);
+			ChangeStatus changeStatus = new ChangeStatus();
+			changeStatus.setUserChange(userFromRequest(request));
+			changeStatus.setDateChangeStatus(new Date());
+			changeStatus.setStatus(StatusEnum.getStatus(status));
+			changeStatus.setTicket(ticketPersisted);
+			ticketService.createChangeStatus(changeStatus);
+			response.setData(ticketPersisted);
+			
+		} catch (Exception e) {
+			response.getErrors().add(e.getMessage());
+			return ResponseEntity.ok(response);
+		}
+		
+		return ResponseEntity.ok(response);
+		
+	}
+	
+	private void validateChangeStatus(String id, String status, BindingResult result) {
+		if (id == null || id.equals("")) {
+			result.addError(new ObjectError("Ticket", "Id no information"));
+			return;
+		}
+		if (status == null || status.equals("")) {
+			result.addError(new ObjectError("Ticket", "Status no information"));
+		}
+	}
+	
+	public ResponseEntity<Response<Summary>> findSummary() {
+		
+	}
+	
 
 }
