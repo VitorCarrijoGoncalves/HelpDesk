@@ -24,6 +24,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.senaigo.helpdesk.api.dto.Summary;
 import br.senaigo.helpdesk.entity.ChangeStatus;
 import br.senaigo.helpdesk.entity.Ticket;
 import br.senaigo.helpdesk.entity.User;
@@ -92,7 +93,7 @@ public class TicketController {
 		return userService.findByEmail(email);
 	}
 	
-	private Integer generateNumber() {
+	int generateNumber() {
 		Random random = new Random();
 		return random.nextInt(9999);
 	}
@@ -302,7 +303,56 @@ public class TicketController {
 		}
 	}
 	
+	@GetMapping(value="/summary")
 	public ResponseEntity<Response<Summary>> findSummary() {
+		
+		Response<Summary> response = new Response<>();
+		
+		Summary summary = new Summary();
+		
+		int amountNew = 0;
+		int amountResolved = 0;
+		int amountApproved = 0;
+		int amountDisapproved = 0;
+		int amountAssigned = 0;
+		int amountClosed = 0;
+		
+		Iterable<Ticket> tickets = ticketService.findAll();
+		
+		if (tickets != null) {
+			for (Iterator<Ticket> iterator = tickets.iterator(); iterator.hasNext();) {
+				Ticket ticket = (Ticket) iterator.next();
+				if (ticket.getStatus().equals(StatusEnum.New)) {
+					amountNew++;
+				}
+				if (ticket.getStatus().equals(StatusEnum.Resolved)) {
+					amountResolved++;
+				}
+				if (ticket.getStatus().equals(StatusEnum.Approved)) {
+					amountApproved++;
+				}
+				if (ticket.getStatus().equals(StatusEnum.Disapproved)) {
+					amountDisapproved++;
+				}
+				if (ticket.getStatus().equals(StatusEnum.Assigned)) {
+					amountAssigned++;
+				}
+				if (ticket.getStatus().equals(StatusEnum.Closed)) {
+					amountClosed++;
+				}
+				
+			}
+		}
+		
+		summary.setAmountNew(amountNew);
+		summary.setAmountResolved(amountResolved);
+		summary.setAmountApproved(amountApproved);
+		summary.setAmountDisapproved(amountDisapproved);
+		summary.setAmountAssigned(amountAssigned);
+		summary.setAmountClosed(amountClosed);
+		response.setData(summary);
+		
+		return ResponseEntity.ok(response);
 		
 	}
 	
