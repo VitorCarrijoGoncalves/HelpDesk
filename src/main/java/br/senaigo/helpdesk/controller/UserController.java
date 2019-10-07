@@ -19,13 +19,14 @@ import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+
 import br.senaigo.helpdesk.entity.User;
 import br.senaigo.helpdesk.response.Response;
 import br.senaigo.helpdesk.service.UserService;
 
 @RestController
-@RequestMapping("/api/user")
 @CrossOrigin(origins = "*")
+@RequestMapping("/api/user")
 public class UserController {
 
 	@Autowired
